@@ -18,7 +18,6 @@ var Settings = require('./lib/settings')
 
 var app = express()
 var server = require('http').Server(app)
-var io = require('socket.io')(server)
 
 setupBasicAuth(config, app)
 
@@ -56,6 +55,7 @@ if (config.type === 'linux' && config.steam && config.steam.path) {
 
   fs.symlinkSync(config.steam.path, tempWorkshopFolder)
 }
+var logs = new Logs(config)
 
 var logs = new Logs(config)
 
@@ -73,6 +73,22 @@ app.use('/api/missions', require('./routes/missions')(missions))
 app.use('/api/mods', require('./routes/mods')(mods))
 app.use('/api/servers', require('./routes/servers')(manager, mods))
 app.use('/api/settings', require('./routes/settings')(settings))
+var baseUrl = config.baseUrl || '/'
+var router = express.Router()
+
+router.use('/api/logs', require('./routes/logs')(logs))
+router.use('/api/missions', require('./routes/missions')(missions))
+router.use('/api/mods', require('./routes/mods')(mods))
+router.use('/api/servers', require('./routes/servers')(manager, mods))
+router.use('/api/settings', require('./routes/settings')(settings))
+router.use('/', require('./routes/main')(baseUrl))
+router.use(serveStatic(path.join(__dirname, 'public')))
+
+app.use(baseUrl, router)
+
+var io = require('socket.io')(server, {
+  path: baseUrl + 'socket.io'
+})
 
 io.on('connection', function (socket) {
   socket.emit('missions', missions.missions)

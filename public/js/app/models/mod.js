@@ -9,4 +9,6 @@ module.exports = Backbone.Model.extend({
   },
   idAttribute: 'id',
   urlRoot: '/api/mods/'
+  idAttribute: 'name',
+  urlRoot: 'api/mods/'
 })

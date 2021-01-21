@@ -18,16 +18,17 @@ module.exports = Backbone.Model.extend({
     password: '',
     persistent: false,
     port: 2302,
+    processes: null,
     state: null,
     title: '',
     von: false,
     verify_signatures: false
   },
-  urlRoot: '/api/servers/',
+  urlRoot: 'api/servers/',
   start: function (cb) {
     var self = this
     $.ajax({
-      url: '/api/servers/' + self.get('id') + '/start',
+      url: 'api/servers/' + self.get('id') + '/start',
       type: 'POST',
       success: function (resp) {
         self.set('pid', resp.pid)
@@ -47,7 +48,7 @@ module.exports = Backbone.Model.extend({
   stop: function (cb) {
     var self = this
     $.ajax({
-      url: '/api/servers/' + self.get('id') + '/stop',
+      url: 'api/servers/' + self.get('id') + '/stop',
       type: 'POST',
       success: function (resp) {
         self.set('pid', resp.pid)
@@ -62,5 +63,14 @@ module.exports = Backbone.Model.extend({
         }
       }
     })
+  },
+
+  missionDifficulty: function () {
+    var serverDifficulty = this.get('forcedDifficulty')
+    if (serverDifficulty) {
+      return serverDifficulty.toLowerCase()
+    }
+
+    return undefined
   }
 })
